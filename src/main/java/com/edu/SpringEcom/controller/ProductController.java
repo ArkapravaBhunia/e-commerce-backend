@@ -39,7 +39,7 @@ public class ProductController {
     public ResponseEntity<?> addProduct(@RequestPart Product product, @RequestPart MultipartFile imageFile){
         Product savedProduct = null;
         try {
-            savedProduct = productService.addProduct(product, imageFile);
+            savedProduct = productService.addOrUpdateProduct(product, imageFile);
             return new ResponseEntity<>(savedProduct, HttpStatus.CREATED);
         } catch (IOException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -66,5 +66,40 @@ public class ProductController {
 //        }
 //    }
 
+    @GetMapping("product/{productId}/image")
+    public ResponseEntity<byte[]>getImageByproductId(@PathVariable int productId){
+        Product product = productService.getProductById(productId);
+        if(product.getId() > 0)
+            return new ResponseEntity<>(product.getImageData(), HttpStatus.OK);
+        else
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 
+    @PutMapping("product/{id}")
+    public ResponseEntity<String> updateProduct(@PathVariable int id, @RequestPart Product product, @RequestPart MultipartFile imageFile){
+        Product updateProduct = null;
+        try{
+            updateProduct = productService.addOrUpdateProduct(product, imageFile);
+            return new ResponseEntity<>("Update", HttpStatus.OK);
+        }catch (IOException e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @DeleteMapping("product/{id}")
+    public ResponseEntity<String> deleteProduct(@PathVariable int id){
+        Product product = productService.getProductById(id);
+        if(product != null){
+            productService.deleteProduct(id);
+            return new ResponseEntity<>("Delete", HttpStatus.OK);
+        }else
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping("/products/search")
+    public ResponseEntity<List<Product>> searchProducts(@RequestParam String keyword){
+        List<Product> products = productService.searchProducts(keyword);
+        System.out.println("search with : " + keyword);
+        return new ResponseEntity<>(products, HttpStatus.OK);
+    }
 }
