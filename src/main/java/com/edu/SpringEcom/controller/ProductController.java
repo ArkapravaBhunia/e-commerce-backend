@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import tools.jackson.databind.ObjectMapper;
+
 
 import java.io.IOException;
 import java.util.List;
@@ -21,22 +21,22 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping("products")
-    public ResponseEntity<List<Product>> getProducts(){
+    public ResponseEntity<List<Product>> getProducts() {
         return new ResponseEntity<>(productService.getAllProducts(), HttpStatus.OK);
     }
 
     @GetMapping("/product/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable int id){
+    public ResponseEntity<Product> getProductById(@PathVariable int id) {
         Product product = productService.getProductById(id);
 
-        if(product != null)
+        if (product != null)
             return new ResponseEntity<>(product, HttpStatus.OK);
         else
             return new ResponseEntity<>(product, HttpStatus.NOT_FOUND);
     }
 
     @PostMapping("/product")
-    public ResponseEntity<?> addProduct(@RequestPart Product product, @RequestPart MultipartFile imageFile){
+    public ResponseEntity<?> addProduct(@RequestPart Product product, @RequestPart MultipartFile imageFile) {
         Product savedProduct = null;
         try {
             savedProduct = productService.addOrUpdateProduct(product, imageFile);
@@ -46,58 +46,39 @@ public class ProductController {
         }
     }
 
-//    @PostMapping("/product")
-//    public ResponseEntity<?> addProduct(@RequestPart("product") String productJson,
-//                                        @RequestPart("imageFile") MultipartFile imageFile) {
-//        try {
-//            // 1. Manually convert the JSON string to the Product object
-//            // This allows us to catch specific formatting errors (like Date issues) inside the code
-//            ObjectMapper mapper = new ObjectMapper();
-//            Product product = mapper.readValue(productJson, Product.class);
-//
-//            // 2. Pass to service
-//            Product savedProduct = productService.addProduct(product, imageFile);
-//            return new ResponseEntity<>(savedProduct, HttpStatus.CREATED);
-//
-//        } catch (Exception e) {
-//            // If the JSON is invalid or Date format is wrong, this error will now appear in Postman
-//            e.printStackTrace();
-//            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-//        }
-//    }
-
     @GetMapping("product/{productId}/image")
-    public ResponseEntity<byte[]>getImageByproductId(@PathVariable int productId){
+    public ResponseEntity<byte[]> getImageByproductId(@PathVariable int productId) {
         Product product = productService.getProductById(productId);
-        if(product.getId() > 0)
+        if (product.getId() > 0)
             return new ResponseEntity<>(product.getImageData(), HttpStatus.OK);
         else
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @PutMapping("product/{id}")
-    public ResponseEntity<String> updateProduct(@PathVariable int id, @RequestPart Product product, @RequestPart MultipartFile imageFile){
+    public ResponseEntity<String> updateProduct(@PathVariable int id, @RequestPart Product product,
+            @RequestPart MultipartFile imageFile) {
         Product updateProduct = null;
-        try{
+        try {
             updateProduct = productService.addOrUpdateProduct(product, imageFile);
             return new ResponseEntity<>("Update", HttpStatus.OK);
-        }catch (IOException e){
+        } catch (IOException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @DeleteMapping("product/{id}")
-    public ResponseEntity<String> deleteProduct(@PathVariable int id){
+    public ResponseEntity<String> deleteProduct(@PathVariable int id) {
         Product product = productService.getProductById(id);
-        if(product != null){
+        if (product != null) {
             productService.deleteProduct(id);
             return new ResponseEntity<>("Delete", HttpStatus.OK);
-        }else
+        } else
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @GetMapping("/products/search")
-    public ResponseEntity<List<Product>> searchProducts(@RequestParam String keyword){
+    public ResponseEntity<List<Product>> searchProducts(@RequestParam String keyword) {
         List<Product> products = productService.searchProducts(keyword);
         System.out.println("search with : " + keyword);
         return new ResponseEntity<>(products, HttpStatus.OK);
